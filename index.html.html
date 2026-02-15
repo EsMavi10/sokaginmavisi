@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sokağın Mavisi: Döngü</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: #0a0a0a;
+            color: #e8f0f8;
+            line-height: 1.8;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(ellipse at 20% 30%, rgba(255, 140, 0, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(255, 140, 0, 0.1) 0%, transparent 50%),
+                linear-gradient(180deg, #1a1410 0%, #0a0a0a 50%, #141414 100%);
+            z-index: -2;
+        }
+
+        /* Wooden texture overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(139, 69, 19, 0.03) 2px, rgba(139, 69, 19, 0.03) 4px);
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        /* Particle effect */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 200, 100, 0.6);
+            border-radius: 50%;
+            animation: float 15s infinite;
+            box-shadow: 0 0 10px rgba(255, 200, 100, 0.5);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+        }
+
+        /* Candle flicker effect */
+        @keyframes flicker {
+            0%, 100% { opacity: 1; filter: brightness(1); }
+            50% { opacity: 0.8; filter: brightness(0.9); }
+        }
+
+        .candle-glow {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255, 140, 0, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: flicker 3s infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .candle-glow-1 { top: 10%; left: 15%; }
+        .candle-glow-2 { top: 60%; right: 20%; animation-delay: 1.5s; }
+        .candle-glow-3 { bottom: 20%; left: 25%; animation-delay: 2.5s; }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(20, 15, 10, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem 2rem;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 140, 0, 0.2);
+            box-shadow: 0 2px 20px rgba(255, 140, 0, 0.1);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: #d4a574;
+            text-decoration: none;
+            font-size: 1rem;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(255, 140, 0, 0.3);
+        }
+
+        nav a:hover {
+            color: #ff8c00;
+            text-shadow: 0 0 15px rgba(255, 140, 0, 0.6);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            color: #d4a574;
+            text-shadow: 0 0 30px rgba(255, 140, 0, 0.5);
+            letter-spacing: 3px;
+            animation: flicker 4s infinite;
+        }
+
+        .subtitle {
+            font-size: 2rem;
+            color: #b08968;
+            font-style: italic;
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 3rem;
+            background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
+            color: #f5e6d3;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.4);
+            margin-top: 1rem;
+            border: 1px solid rgba(255, 140, 0, 0.3);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 140, 0, 0.6);
+            background: linear-gradient(135deg, #a0522d 0%, #8b4513 100%);
+        }
+
+        /* Sections */
+        section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #d4a574;
+            text-align: center;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(255, 140, 0, 0.4);
+        }
+
+        /* About Section */
+        .about-content {
+            background: rgba(30, 25, 20, 0.8);
+            padding: 3rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 140, 0, 0.2);
+            font-size: 1.2rem;
+            line-height: 2;
+            text-align: justify;
+            font-style: italic;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Reader Reviews Section (was Quotes) */
+        .reviews-container {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .review-card {
+            background: rgba(30, 25, 20, 0.9);
+            padding: 2.5rem;
+            border-radius: 15px;
+            border-left: 4px solid #d4a574;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .review-card:hover {
+            transform: translateX(10px);
+            border-left-color: #ff8c00;
+            background: rgba(30, 25, 20, 1);
+            box-shadow: 0 8px 30px rgba(255, 140, 0, 0.3);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 140, 0, 0.2);
+        }
+
+        .reviewer-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .reviewer-name {
+            font-weight: bold;
+            color: #d4a574;
+            font-size: 1.1rem;
+        }
+
+        .review-date {
+            font-size: 0.85rem;
+            color: #b08968;
+            font-style: italic;
+        }
+
+        .stars {
+            color: #ffd700;
+            font-size: 1.2rem;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        .review-text {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #e8d5c4;
+            font-style: italic;
+        }
+
+        .review-quote {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.3);
+            border-left: 3px solid #ff8c00;
+            font-size: 0.95rem;
+            color: #d4a574;
+        }
+
+        /* Gallery */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .gallery-item {
+            background: rgba(30, 25, 20, 0.8);
+            height: 400px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: #d4a574;
+            border: 2px dashed rgba(255, 140, 0, 0.3);
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .gallery-item:hover {
+            border-color: #ff8c00;
+            background: rgba(30, 25, 20, 1);
+            box-shadow: 0 8px 30px rgba(255, 140, 0, 0.3);
+        }
+
+        /* Buy Section */
+        .buy-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .buy-link {
+            padding: 1.5rem 3rem;
+            background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
+            color: #f5e6d3;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.4);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+        }
+
+        .buy-link:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 140, 0, 0.6);
+            background: linear-gradient(135deg, #a0522d 0%, #8b4513 100%);
+        }
+
+        /* Blog */
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .blog-card {
+            background: rgba(30, 25, 20, 0.8);
+            padding: 2rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 140, 0, 0.2);
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .blog-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 140, 0, 0.3);
+        }
+
+        .blog-title {
+            color: #d4a574;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .blog-date {
+            color: #b08968;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Contact Form */
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(30, 25, 20, 0.8);
+            padding: 3rem;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 140, 0, 0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #d4a574;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(10, 10, 10, 0.8);
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            border-radius: 5px;
+            color: #e8d5c4;
+            font-family: 'Georgia', serif;
+            font-size: 1rem;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #ff8c00;
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.4);
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #8b4513 0%, #654321 100%);
+            color: #f5e6d3;
+            border: 1px solid rgba(255, 140, 0, 0.3);
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 140, 0, 0.5);
+            background: linear-gradient(135deg, #a0522d 0%, #8b4513 100%);
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(20, 15, 10, 0.95);
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid rgba(255, 140, 0, 0.2);
+            position: relative;
+            z-index: 2;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .subtitle {
+                font-size: 1.5rem;
+            }
+            
+            nav ul {
+                gap: 1rem;
+            }
+
+            .review-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Candle glow effects -->
+    <div class="candle-glow candle-glow-1"></div>
+    <div class="candle-glow candle-glow-2"></div>
+    <div class="candle-glow candle-glow-3"></div>
+
+    <!-- Particles -->
+    <div class="particles" id="particles"></div>
+
+    <nav>
+        <ul>
+            <li><a href="#ana-sayfa">Ana Sayfa</a></li>
+            <li><a href="#hakkinda">Kitap Hakkında</a></li>
+            <li><a href="#okuyucu-yorumlari">Okuyucu Yorumları</a></li>
+            <li><a href="#galeri">Galeri</a></li>
+            <li><a href="#satin-al">Satın Al</a></li>
+            <li><a href="#blog">Blog</a></li>
+            <li><a href="#iletisim">İletişim</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero" id="ana-sayfa">
+        <div class="hero-content">
+            <h1>SOKAĞIN MAVİSİ</h1>
+            <p class="subtitle">Döngü</p>
+            <a href="#satin-al" class="cta-button">Şimdi Edinin</a>
+        </div>
+    </section>
+
+    <section id="hakkinda">
+        <h2>Kitap Hakkında</h2>
+        <div class="about-content">
+            <p>Yürüdüğümüz yolun karşı istikametinden, yürüdüğü yola tutunamayan epey zayıf bir kadın geliyordu. Dolanıyordu kendine, dolanıyordu hıçkırıklarına. Kıvırcık sarı saçları üstten pembe bir tokayla tutuşturulmuş, açıkta kalan kısımlar denizin dalgaları gibi kabarık. Gözyaşlarına dayanamayan rimeli kara bir sansür gibi akıyor yanaklarından. Ağzında bir dolu küfür. Elinde tuttuğu yarısı dolu bira şişesini, sallanıyor bir o yana bir bu yana. Ağzı bir dolu küfür, felekten bir gece çalmayı bu gece de başaramamış kadın. İçinde kocaman güçlü bir boşluk. İçimden onu hiç incitmeden içine doğru bir şiir okuyorum sessizce:</p>
+            <br>
+            <p style="text-align: center; font-size: 1.1rem; color: #d4a574;">
+                Hangi baharın zulmünde çiçeksin de,<br>
+                Hangi güneşe aldırış etmiyor yüzün,<br>
+                Hangi suya küsmüş gövden,<br>
+                Hangi baharın,<br>
+                Hangi çiçeğisin,<br>
+                Yorgun?
+            </p>
+        </div>
+    </section>
+
+    <section id="okuyucu-yorumlari">
+        <h2>Okuyucu Yorumları</h2>
+        <div class="reviews-container">
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-info">
+                        <span class="reviewer-name">Zeynep K.</span>
+                        <span class="review-date">15 Ocak 2026</span>
+                    </div>
+                    <span class="stars">★★★★★</span>
+                </div>
+                <p class="review-text">Bu kitap beni çok derinden etkiledi. Şehrin karanlık köşelerinde kaybolmuş ruhların hikayesi adeta kendi içimdeki sesleri yankıladı. Her sayfa bir şiir gibiydi.</p>
+                <div class="review-quote">"Hangi baharın zulmünde çiçeksin de..." dizesi günlerdir aklımdan çıkmıyor. Muhteşem bir metafor.</div>
+            </div>
+
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-info">
+                        <span class="reviewer-name">Mehmet A.</span>
+                        <span class="review-date">8 Ocak 2026</span>
+                    </div>
+                    <span class="stars">★★★★★</span>
+                </div>
+                <p class="review-text">Sokağın Mavisi'ni bir oturuşta bitirdim. Karakterlerin içsel dünyası o kadar canlı ki, sanki onlarla aynı sokaklarda yürüyormuşum gibi hissettim. Dili çok güçlü, anlatımı akıcı.</p>
+            </div>
+
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-info">
+                        <span class="reviewer-name">Aylin S.</span>
+                        <span class="review-date">3 Ocak 2026</span>
+                    </div>
+                    <span class="stars">★★★★★</span>
+                </div>
+                <p class="review-text">Şiirsel dili ve derin felsefi sorgulamalarıyla bambaşka bir deneyim. Her cümle ayrı bir düşünce, her paragraf ayrı bir duygu. Sokakların mavisi gerçekten de hüzün rengiymiş.</p>
+                <div class="review-quote">"İçinde kocaman güçlü bir boşluk" ifadesi tam da modern insanın halini anlatıyor.</div>
+            </div>
+
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-info">
+                        <span class="reviewer-name">Can Y.</span>
+                        <span class="review-date">28 Aralık 2025</span>
+                    </div>
+                    <span class="stars">★★★★★</span>
+                </div>
+                <p class="review-text">Uzun zamandır okuduğum en etkileyici romanlardan biri. Yazar, sıradan görünen sokak hikayelerini şiire dönüştürmüş. Her karakterin içindeki çığlığı duyabiliyorsunuz.</p>
+            </div>
+
+            <div class="review-card">
+                <div class="review-header">
+                    <div class="reviewer-info">
+                        <span class="reviewer-name">Elif T.</span>
+                        <span class="review-date">22 Aralık 2025</span>
+                    </div>
+                    <span class="stars">★★★★★</span>
+                </div>
+                <p class="review-text">Bu kitabı okurken bazen duraksadım, bazen gözyaşlarımı tutamadım. Şehir hayatının yalnızlığını, kaybolmuşluğunu ve umut arayışını bu kadar çarpıcı anlatan başka bir eser görmedim.</p>
+                <div class="review-quote">Kitaptaki kadın karakterler özellikle çok güçlü. Her biri ayrı bir dünya, ayrı bir acı, ayrı bir direniş.</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="galeri">
+        <h2>Galeri</h2>
+        <div class="gallery-grid">
+            <div class="gallery-item">Kitap Kapağı</div>
+            <div class="gallery-item">Karakter İllüstrasyonu</div>
+            <div class="gallery-item">Şehir Atmosferi</div>
+        </div>
+    </section>
+
+    <section id="satin-al">
+        <h2>Satın Al</h2>
+        <div class="buy-links">
+            <a href="https://play.google.com/store/books/details?id=oOGfEQAAQBAJ&pli=1" target="_blank" class="buy-link">Google Play Books</a>
+            <a href="#" class="buy-link">Diğer Platformlar</a>
+        </div>
+    </section>
+
+    <section id="blog">
+        <h2>Blog</h2>
+        <div class="blog-grid">
+            <div class="blog-card">
+                <h3 class="blog-title">Yazı Süreci Hakkında</h3>
+                <p class="blog-date">Yakında...</p>
+                <p>Romanın yazılış hikayesi ve ilham kaynakları.</p>
+            </div>
+            <div class="blog-card">
+                <h3 class="blog-title">Karakterler</h3>
+                <p class="blog-date">Yakında...</p>
+                <p>Sokağın Mavisi'ndeki karakterlerin derinlemesine analizi.</p>
+            </div>
+            <div class="blog-card">
+                <h3 class="blog-title">Şehir ve Edebiyat</h3>
+                <p class="blog-date">Yakında...</p>
+                <p>Şehir yaşamının edebiyattaki yansımaları.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="iletisim">
+        <h2>İletişim</h2>
+        <form class="contact-form" onsubmit="handleSubmit(event)">
+            <div class="form-group">
+                <label for="name">Adınız</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">E-posta</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="message">Mesajınız</label>
+                <textarea id="message" name="message" required></textarea>
+            </div>
+            <button type="submit">Gönder</button>
+        </form>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Sokağın Mavisi: Döngü. Tüm hakları saklıdır.</p>
+    </footer>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 30;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                const size = Math.random() * 3 + 1;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.animationDelay = `${Math.random() * 15}s`;
+                particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        createParticles();
+
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Form submission
+        function handleSubmit(event) {
+            event.preventDefault();
+            alert('Mesajınız için teşekkür ederiz! En kısa sürede size dönüş yapacağız.');
+            event.target.reset();
+        }
+
+        // Parallax effect on hero
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const hero = document.querySelector('.hero-content');
+            if (hero) {
+                hero.style.transform = `translateY(${scrolled * 0.5}px)`;
+                hero.style.opacity = 1 - scrolled / 700;
+            }
+        });
+    </script>
+</body>
+</html>
